@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <style>
+    body {
+      font-family: "Lato", sans-serif;
+    }
+
+    #stripe {
+      font-size: 0;
+    }
+
+    button {
+      font-size: 14px; 
+    }
+
+    .sidebar {
+      background-color: #555 30%;
+      top: 0px;
+      bottom: 0px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="sidebar">
+    <h2> Class and Data Settings</h2>
+
+    <p>After entering the required infos, click the update button to upload grades to classroom</p>
+
+    <div class="block form-group">
+      <label for="course">Enter the course name or choose from the list
+        (Click the button to get your course list from classroom) </label><br>
+      <input id="course" type="text" placeholder="Course title.." value="" />
+      <br>
+      <button for="selectCourse" class="blue" id="buttonGetCourses" onClick="getCourseList(this);"> Or Choose From
+        List</button>
+      <select id="selectCourse" onselect="disabled-select" disabled>
+        <option>No courses </option>
+      </select>
+    </div>
+    <div class="block form-group">
+      <label for="assignment">The assignment name </label><br>
+      <input id="assignment" type="text" onClick="getSelectedRange3(this);" placeholder="Assignment title"
+        value="" /><br>
+      <input type="checkbox" id="create-assignment" />
+      <label for="create-assignment"> Create new assignment </label>
+    </div>
+
+    <div class="block form-group">
+      <label for="range">Enter a range of two columns(emails-grades). For example, A1:B100 or [A1:A100, B1:B100], or [A,
+        B]
+      </label> <br>
+      <input id="range" type="text" onClick="getSelectedRange3(this);" placeholder="Specify Range.." value="" />
+    </div>
+
+    <div class="block form-group">
+      <input type="checkbox" id="return-grades">
+      <label for="return-grades">
+        Also return grades to students</label><br>
+      <button class="blue" id="upload-grades" onClick="uploadGradesToClassroom(this);">
+        UploadGrades</button>
+      <br>
+      <label for="upload-grades" id="status" style.display="none">
+        status </label><br>
+    </div>
+    <div class="block form-group">
+      <br><br><br><br>
+      <span class="gray">
+        for support, contact <a href="emailto: life@infeza.space"> life@infeza.space </a></span>
+    </div>
+  </div>
+</body>
+
+<script>
+
+
+  // Function to be called on success
+  function updateTextField(range, button) {
+    var textFieldId = button.id.split("_").shift();
+    document.getElementById(textFieldId).value = range; // Update the text field value
+    button.innerHTML = "Get Selected Range"; // Reset the button value
+    button.disabled = false;
+  }
+
+
+  // Function to be called on success
+  function updateCourseList(list, button) {
+    button.innerHTML = "courses updating.."; // Reset the button value
+    list = JSON.parse(list);
+    var selectCourse = document.getElementById("selectCourse");
+    button.innerHTML = "selecting."; // Reset the button value
+    while (selectCourse.options.length) {
+      selectCourse.remove(0);
+    }
+
+    if (list) {
+      button.innerHTML = "adding."; // Reset the button value
+      var i;
+      for (i = 0; i < list.length; i++) {
+        var course = new Option(list[i], i);
+        selectCourse.options.add(course);
+      }
+      button.innerHTML = "added."; // Reset the button value
+    }
+    selectCourse.disabled = false;
+    button.innerHTML = "Renew Course List"; // Reset the button value
+    button.disabled = false;
+  }
+
+  // Function makes request from app script
+  function getCourseList(button) {
+    button.innerHTML = "Getting Courses..."; // Change the button value while getting range
+    button.disabled = true;         // Disable the button while getting range
+    //return updatecourseList('111',button);
+    google.script.run
+      .withSuccessHandler(updateCourseList)
+      .withUserObject(button)               // To pass the event element object
+      .getCourseList();                  // Apps Sript JS Function
+    return;
+  }
+
+
+  function getSelectedRange2(button) {
+    secondClick = true;
+    button.innerHTML = "Picking.."; // Change the button value while getting range
+    button.disabled = true;         // Disable the button while getting range
+    google.script.run
+      .withSuccessHandler(updateTextField2)
+      .withUserObject(button)               // To pass the event element object
+      .getSelectedRange2();                  // Apps Sript JS Function
+    return;
+  }
+
+  var secondClick = false;
+  function getSelectedRange3(event) {
+    var textField = documents.getElementById('textFieldRanges');
+    if (!secondClick) {
+      getSelectedRange2(event);
+      secondClick = true;
+    } else if (textField.innerHTML == '') {
+      secondClick = false;
+    }
+  };
+
+  // Function makes request from app script
+  function uploadGradesToClassroom(button) {
+
+    var status = document.getElementById("status");
+    status.innerHTML = 'The following grades are uploading...\n';
+    var course = document.getElementById("course").value;
+    var assignment = document.getElementById("assignment").value;
+    var range = document.getElementById("range").value;
+    var assignedGrade = document.getElementById("return-grades").value;
+    var createAssignment = document.getElementById("create-assignment").value;
+
+    var data = {
+      'course': course,
+      'assignment': assignment,
+      'range': range,
+      'createAssignment': createAssignment,
+      'assignedGrade': assignedGrade
+    };
+
+    button.innerHTML = "Sending Grade Courses..."; // Change the button value while getting range
+    button.disabled = true;         // Disable the button while getting range
+    //return updatecourseList('111',button);
+    google.script.run
+      .withSuccessHandler(updateSuccessHandle)
+      .withFailureHandler(updateFailureHandle)
+      .withUserObject(button)               // To pass the event element object
+      .uploadGradesToClassroom(JSON.stringify(data));                  // Apps Sript JS Function
+    return;
+  }
+
+  function updateSuccessHandle(unsuccessList, button) {
+    button.innerHTML = 'UploadGrades';
+    button.disabled = false;
+    var status = document.getElementById("status");
+    status.innerHTML = 'The following grades are not updated\n' + unsuccessList.length;
+  }
+
+  function updateFailureHandle(unsuccessList, button) {
+    button.innerHTML = 'UploadGrades';
+    button.disabled = false;
+    var status = document.getElementById("status");
+    status.innerHTML = 'The call to server is failed\n';
+  }
+</script>
+
+</html>
