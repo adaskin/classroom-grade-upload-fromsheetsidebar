@@ -7,8 +7,9 @@ The application creates a spreadsheet menu which creates a sidebar to specify em
 ## Privacy Policy
 This add-on runs on client side which uses app scripts and does not collect any information. 
 Using this add-on means granting access to the add-on on the current open Spreadsheet and on Classroom courses to look for student assignments and change their grades.
-License
-This is free software, licensed under the Apache License, Version 2.0. Read this for a summary.
+
+## License
+This is free software, licensed under the Apache License, Version 2.0.
 
 ## Copyright
 Copyright 2023 ammar daskin, all rights reserved.
