@@ -53,7 +53,7 @@
     <div class="block form-group">
       <br><br><br><br>
       <span class="gray">
-        for support, contact <a href="https://github.com/adaskin/grades-fromsheet-toclassroom/discussions/new"> github discussion </a></span>
+      <a href="https://github.com/adaskin/grades-fromsheet-toclassroom/issues">report issues</a></span>
     </div>
   </div>
 </body>
@@ -173,14 +173,14 @@ function uploadRequestSuccessHandle(unsuccessList, button) {
   button.innerHTML = 'UploadGrades';
   button.disabled = false;
   var status = document.getElementById("status");
-  status.innerHTML = 'The following #grades are not updated: ' + unsuccessList.length;
+  status.innerHTML = 'The grades are updated!!!';
 }
 
 function uploadRequestFailureHandle(unsuccessList, button) {
   button.innerHTML = 'UploadGrades';
   button.disabled = false;
   var status = document.getElementById("status");
-  status.innerHTML = 'The call to server is failed.';
+  status.innerHTML = 'The upload is failed.';
 }
 ///////////////////////////////////////////////////////////////////////
 </script>
