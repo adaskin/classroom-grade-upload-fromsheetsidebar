@@ -197,8 +197,7 @@ function readGradesFromSheetToClassroom(courseId, work, data) {
     }
     //patch to student's grade to classroom
 
-    doPatchOnDraftGrade(courseId, work.id, submission.id, grade,);
+    doPatchOnDraftGrade(courseId, work.id, submission.id, grade);
     Logger.log("updated grade for " + email + grade);
   }
 }
-
