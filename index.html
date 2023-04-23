@@ -3,31 +3,10 @@
 
 <head>
   <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-  <style>
-    body {
-      font-family: "Lato", sans-serif;
-    }
-
-    #stripe {
-      font-size: 0;
-    }
-
-    button {
-      font-size: 14px; 
-    }
-
-    .sidebar {
-      background-color: #555 30%;
-      top: 0px;
-      bottom: 0px;
-    }
-  </style>
 </head>
 
 <body>
-
   <div class="sidebar">
     <h2> Class and Data Settings</h2>
 
@@ -38,25 +17,27 @@
         (Click the button to get your course list from classroom) </label><br>
       <input id="course" type="text" placeholder="Course title.." value="" />
       <br>
-      <button for="selectCourse" class="blue" id="buttonGetCourses" onClick="getCourseList(this);"> Or Choose From
-        List</button>
-      <select id="selectCourse" onselect="disabled-select" disabled>
+      <button for="selectCourse" class="blue"
+        id="buttonGetCourses"
+        onClick="getCourseList(this);">
+        CourseList
+      </button>
+      <select id="selectCourse" onchange="selectItem(this)" disabled>
         <option>No courses </option>
       </select>
     </div>
     <div class="block form-group">
       <label for="assignment">The assignment name </label><br>
-      <input id="assignment" type="text" onClick="getSelectedRange3(this);" placeholder="Assignment title"
+      <input id="assignment" type="text" placeholder="Assignment title"
         value="" /><br>
       <input type="checkbox" id="create-assignment" />
       <label for="create-assignment"> Create new assignment </label>
     </div>
 
     <div class="block form-group">
-      <label for="range">Enter a range of two columns(emails-grades). For example, A1:B100 or [A1:A100, B1:B100], or [A,
-        B]
+      <label for="range">Enter a range of two columns(emails-grades). For example, A1:B100 or [A1:A100, B1:B100], or [A, B]
       </label> <br>
-      <input id="range" type="text" onClick="getSelectedRange3(this);" placeholder="Specify Range.." value="" />
+      <input id="range" type="text" onClick="getSelectedRange(this);" placeholder="Specify Range.." value="" />
     </div>
 
     <div class="block form-group">
@@ -72,125 +53,136 @@
     <div class="block form-group">
       <br><br><br><br>
       <span class="gray">
-        for support, contact <a href="emailto: life@infeza.space"> life@infeza.space </a></span>
+        for support, contact <a href="https://github.com/adaskin/grades-fromsheet-toclassroom/discussions/new"> github discussion </a></span>
     </div>
   </div>
 </body>
-
 <script>
+  //update course name field from dropdownlist
+function selectItem(select) {
+  var course = document.getElementById("course");
+  course.innerHTML = select.options[select.selectedIndex].text;
+  course.value = select.options[select.selectedIndex].text;
+}
 
+/**
+ * get course list request to  server-appscript
+ */
+function getCourseList(button) {
+  button.innerHTML = "Getting Courses..."; // Change the button value while getting range
+  button.disabled = true;         // Disable the button while getting range
+  google.script.run
+    .withSuccessHandler(updateCourseListSuccessHandler)
+    .withUserObject(button)           
+    .getCourseList();                  // get request to Apps Sript
+  return;
+}
 
-  // Function to be called on success
-  function updateTextField(range, button) {
-    var textFieldId = button.id.split("_").shift();
-    document.getElementById(textFieldId).value = range; // Update the text field value
-    button.innerHTML = "Get Selected Range"; // Reset the button value
-    button.disabled = false;
+// Function to be called on success
+function updateCourseListSuccessHandler(list, button) {
+  button.innerHTML = "courses updating.."; // Reset the button value
+  list = JSON.parse(list);
+  var selectCourse = document.getElementById("selectCourse");
+  button.innerHTML = "selecting."; // Reset the button value
+  while (selectCourse.options.length) {
+    selectCourse.remove(0);
   }
 
-
-  // Function to be called on success
-  function updateCourseList(list, button) {
-    button.innerHTML = "courses updating.."; // Reset the button value
-    list = JSON.parse(list);
-    var selectCourse = document.getElementById("selectCourse");
-    button.innerHTML = "selecting."; // Reset the button value
-    while (selectCourse.options.length) {
-      selectCourse.remove(0);
+  if (list) {
+    button.innerHTML = "adding."; // Reset the button value
+    var i;
+    for (i = 0; i < list.length; i++) {
+      var course = new Option(list[i], list[i]);
+      selectCourse.options.add(course);
     }
 
-    if (list) {
-      button.innerHTML = "adding."; // Reset the button value
-      var i;
-      for (i = 0; i < list.length; i++) {
-        var course = new Option(list[i], i);
-        selectCourse.options.add(course);
-      }
-      button.innerHTML = "added."; // Reset the button value
-    }
-    selectCourse.disabled = false;
-    button.innerHTML = "Renew Course List"; // Reset the button value
-    button.disabled = false;
+    button.innerHTML = "added."; // Reset the button value
+    document.getElementById("course").value = list[0];
   }
-
-  // Function makes request from app script
-  function getCourseList(button) {
-    button.innerHTML = "Getting Courses..."; // Change the button value while getting range
-    button.disabled = true;         // Disable the button while getting range
-    //return updatecourseList('111',button);
-    google.script.run
-      .withSuccessHandler(updateCourseList)
-      .withUserObject(button)               // To pass the event element object
-      .getCourseList();                  // Apps Sript JS Function
-    return;
-  }
+  selectCourse.disabled = false;
+  button.innerHTML = "Renew Course List"; // Reset the button value
+  button.disabled = false;
+}
 
 
-  function getSelectedRange2(button) {
+/////////////////////////////////////////////////
+var secondClick = false;
+/**
+ * get selected range from app script
+ */
+function getSelectedRange(event) {
+  var range = document.getElementById('course');
+  if (!secondClick) {
     secondClick = true;
-    button.innerHTML = "Picking.."; // Change the button value while getting range
-    button.disabled = true;         // Disable the button while getting range
     google.script.run
-      .withSuccessHandler(updateTextField2)
-      .withUserObject(button)               // To pass the event element object
-      .getSelectedRange2();                  // Apps Sript JS Function
-    return;
+      .withSuccessHandler(updateRangeTextField)
+      .withUserObject(range)   // To pass the event element object
+      .getSelectedRangeAsJSON(); // get selected range from server app script
+  } else if (textField.value == "") {
+    secondClick = false;
   }
+}
+//update  text field
+function updateRangeTextField(text, textField) {
+  var range = document.getElementById("range");
+  range.innerHTML = text;
+  range.value = text;
+}
+////////////////////////////////////////////////////////
+/**
+ * post request to appscript
+ * the  JSON of the following is sent
+ * data = {
+    'course': course,
+    'assignment': assignment,
+    'range': 'A1:B100',//a range of two columns
+    'createAssignment': createAssignment,
+    'assignedGrade': assignedGrade
+  }
+ */
+function uploadGradesToClassroom(button) {
 
-  var secondClick = false;
-  function getSelectedRange3(event) {
-    var textField = documents.getElementById('textFieldRanges');
-    if (!secondClick) {
-      getSelectedRange2(event);
-      secondClick = true;
-    } else if (textField.innerHTML == '') {
-      secondClick = false;
-    }
+  var status = document.getElementById("status");
+  status.innerHTML = 'The following grades are uploading...\n';
+  var course = document.getElementById("course").value;
+  var assignment = document.getElementById("assignment").value;
+  var range = document.getElementById("range").value;
+  var returnGrades = document.getElementById("return-grades").value;
+  var createAssignment = document.getElementById("create-assignment").value;
+
+  var data = {
+    'course': course,
+    'assignment': assignment,
+    'range': range,
+    'createAssignment': createAssignment,
+    'returnGrades': returnGrades//whether to return to students
   };
 
-  // Function makes request from app script
-  function uploadGradesToClassroom(button) {
+  button.innerHTML = "Sending Grade Courses..."; 
+  button.disabled = true;   
 
-    var status = document.getElementById("status");
-    status.innerHTML = 'The following grades are uploading...\n';
-    var course = document.getElementById("course").value;
-    var assignment = document.getElementById("assignment").value;
-    var range = document.getElementById("range").value;
-    var assignedGrade = document.getElementById("return-grades").value;
-    var createAssignment = document.getElementById("create-assignment").value;
+  google.script.run
+    .withSuccessHandler(uploadRequestSuccessHandle)
+    .withFailureHandler(uploadRequestFailureHandle)
+    .withUserObject(button)                          // pass the event element object
+    .uploadGradesToClassroom(JSON.stringify(data)); // post request to Apps Sript
+  return;
+}
 
-    var data = {
-      'course': course,
-      'assignment': assignment,
-      'range': range,
-      'createAssignment': createAssignment,
-      'assignedGrade': assignedGrade
-    };
+function uploadRequestSuccessHandle(unsuccessList, button) {
+  button.innerHTML = 'UploadGrades';
+  button.disabled = false;
+  var status = document.getElementById("status");
+  status.innerHTML = 'The following #grades are not updated: ' + unsuccessList.length;
+}
 
-    button.innerHTML = "Sending Grade Courses..."; // Change the button value while getting range
-    button.disabled = true;         // Disable the button while getting range
-    //return updatecourseList('111',button);
-    google.script.run
-      .withSuccessHandler(updateSuccessHandle)
-      .withFailureHandler(updateFailureHandle)
-      .withUserObject(button)               // To pass the event element object
-      .uploadGradesToClassroom(JSON.stringify(data));                  // Apps Sript JS Function
-    return;
-  }
-
-  function updateSuccessHandle(unsuccessList, button) {
-    button.innerHTML = 'UploadGrades';
-    button.disabled = false;
-    var status = document.getElementById("status");
-    status.innerHTML = 'The following grades are not updated\n' + unsuccessList.length;
-  }
-
-  function updateFailureHandle(unsuccessList, button) {
-    button.innerHTML = 'UploadGrades';
-    button.disabled = false;
-    var status = document.getElementById("status");
-    status.innerHTML = 'The call to server is failed\n';
-  }
+function uploadRequestFailureHandle(unsuccessList, button) {
+  button.innerHTML = 'UploadGrades';
+  button.disabled = false;
+  var status = document.getElementById("status");
+  status.innerHTML = 'The call to server is failed.';
+}
+///////////////////////////////////////////////////////////////////////
 </script>
 
 </html>
