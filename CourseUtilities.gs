@@ -1,4 +1,3 @@
-
 /**
  * updates the grade of a given submission
  */
@@ -20,12 +19,6 @@ function doPatchOnDraftGrade(id, workId, submissionId, grade,
     );
 }
 
-
-/*
--------------------------------
-HelperFunctions
--------------------------------
-*/
 /**
  * given course name returns its id
  */
@@ -77,4 +70,3 @@ function createCourseDetails(workTitle){
   }
   return workDetails;
 }
-
