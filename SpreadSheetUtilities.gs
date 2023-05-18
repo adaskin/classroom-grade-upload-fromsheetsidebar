@@ -41,7 +41,7 @@ function convertRangeToIndices(range) {
   emailCol = firstPart.charCodeAt(0) - "A".charCodeAt(0);
 
   startIndex = (firstPart.length > 1) ?
-    parseInt(firstPart.slice(1, firstPart.lenthg), 10) : 1;
+    parseInt(firstPart.slice(1, firstPart.length), 10) : 1;
   endIndex = (secondPart.length > 1) ?
     parseInt(secondPart.slice(1, secondPart.length), 10) : 1000;//Set to a Maksimum 1000.
 
