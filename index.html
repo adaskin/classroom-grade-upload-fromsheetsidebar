@@ -148,7 +148,7 @@ function uploadGradesToClassroom(button) {
   var assignment = document.getElementById("assignment").value;
   var range = document.getElementById("range").value;
   var returnGrades = document.getElementById("return-grades").value;
-  var createAssignment = document.getElementById("create-assignment").value;
+  var createAssignment = document.getElementById("create-assignment").checked;
 
   var data = {
     'course': course,
